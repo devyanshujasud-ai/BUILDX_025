@@ -100,21 +100,6 @@ Road deterioration, fissures, and unpatched potholes cause billions of dollars i
 ## 3. Deep-Dive Module Breakdown
 
 ### 3.1 AI Computer Vision Pipeline
-- **Primary Deep Learning Detector**: Loads the `yolov8n.pt` neural network via `ultralytics.YOLO`. When custom pothole weights (`weights/yolov8_pothole.pt`) are present, it seamlessly loads them; otherwise, it operates using the base detector coupled with computer vision feature extractors.
-- **Secondary Computer Vision Heuristic Fallback**:
-  - Implemented in `DetectionService.detect_potholes_cv`.
-  - Converts images to grayscale, removes upper 35% non-road horizon noise using region-of-interest masks, applies $7\times 7$ Gaussian blur, and computes inverse adaptive Gaussian thresholding.
-  - Applies morphological closing via an elliptical structuring element ($9\times 9$) to isolate road voids and contours.
-  - Filters contours based on surface area thresholds ($0.8\%$ to $45\%$ of frame) and aspect ratios ($0.4 \le \text{AR} \le 3.5$) characteristic of road depressions.
-- **Visual Bounding Box Annotation**: Draws high-visibility bounding boxes with color-coded severity tags and confidence percentages directly onto the output image using OpenCV (`cv2.rectangle`, `cv2.putText`).
-
-### 3.2 Severity Scoring & Classification Mathematical Model
-The severity score ($S$) is calculated using the defect's bounding box area ratio ($R$) and model confidence ($C$):
-
-$$R = \frac{\text{width}_{\text{box}} \times \text{height}_{\text{box}}}{\text{width}_{\text{image}} \times \text{height}_{\text{image}}}$$
-
-$$S = \min\left(10.0, \, \max\left(1.0, \, (R \times 70.0) + (C \times 3.0)\right)\right)$$
-
 | Severity Tier | Criteria | Color Code | Action Required |
 |---|---|---|---|
 | 🔴 **CRITICAL** | $R \ge 0.12$ or $S \ge 8.5$ | `#ef4444` (Red) | Immediate dispatch; structural hazard; emergency patch within 24h. |

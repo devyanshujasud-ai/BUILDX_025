@@ -1,0 +1,42 @@
+# Node / Frontend
+Frontend/node_modules/
+Frontend/dist/
+Frontend/.vite/
+
+# Python / Backend
+Backend/__pycache__/
+Backend/*/__pycache__/
+Backend/*/*/__pycache__/
+*.py[cod]
+*$py.class
+Backend/venv/
+Backend/.venv/
+venv/
+.venv/
+env/
+.env
+
+# Environment variables & sensitive credentials
+.env
+Backend/.env
+Frontend/.env
+*.env.local
+
+# Database
+Backend/*.db
+*.sqlite
+*.sqlite3
+
+# Uploads directory (keep directory via .gitkeep, ignore actual media blobs)
+uploads/*
+!uploads/.gitkeep
+Backend/uploads/*
+!Backend/uploads/.gitkeep
+
+# IDE & OS files
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db

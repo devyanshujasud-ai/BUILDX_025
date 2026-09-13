@@ -250,7 +250,7 @@ Pothole Detection and Reporting System/
 
 ## 5. Database Schema & Relational Models
 
-```mermaid
+mermaid
 erDiagram
     CIVIC_AUTHORITY ||--o{ POTHOLE : "assigned_to"
     CIVIC_AUTHORITY ||--o{ CIVIC_TICKET : "receives"
@@ -356,7 +356,7 @@ Detects potholes in an uploaded image, resolves civic authority, and creates inc
     "id": 42, "ticket_code": "TKT-20260913-MCD-S-8932", "status": "REPORTED"
   }
 }
-```
+
 
 #### `POST /api/detect/video`
 Processes video clips, sampling frames at intervals and aggregating unique defect detections.

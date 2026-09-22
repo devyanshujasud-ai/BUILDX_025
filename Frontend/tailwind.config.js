@@ -17,10 +17,11 @@ export default {
           900: '#082f49',
         },
         civic: {
-          mcd: '#0284c7',
+          nmc: '#0284c7',
           pwd: '#d97706',
           nhai: '#059669',
-          ndmc: '#7c3aed',
+          nit: '#7c3aed',
+          metro: '#ec4899',
         },
         severity: {
           low: '#22c55e',

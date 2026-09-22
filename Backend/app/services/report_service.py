@@ -67,7 +67,7 @@ class ReportService:
             [Paragraph("<b>Responsible Civic Authority:</b>", cell_style), Paragraph(f"<b>{auth_name}</b> ({auth_email})", cell_style)],
             [Paragraph("<b>Resolution SLA Target:</b>", cell_style), Paragraph(sla, cell_style)],
             [Paragraph("<b>GPS Coordinates:</b>", cell_style), Paragraph(f"Latitude: {pothole.latitude:.5f}, Longitude: {pothole.longitude:.5f}", cell_style)],
-            [Paragraph("<b>Street / Location:</b>", cell_style), Paragraph(f"{pothole.road_name or 'Arterial Road'}, {pothole.zone or ''}, {pothole.city or 'Delhi NCR'}", cell_style)],
+            [Paragraph("<b>Street / Location:</b>", cell_style), Paragraph(f"{pothole.road_name or 'Arterial Road'}, {pothole.zone or ''}, {pothole.city or 'Nagpur'}", cell_style)],
             [Paragraph("<b>Road Classification:</b>", cell_style), Paragraph(str(pothole.road_type), cell_style)],
             [Paragraph("<b>AI Confidence:</b>", cell_style), Paragraph(f"{int(pothole.confidence * 100)}%", cell_style)],
             [Paragraph("<b>Detection Timestamp:</b>", cell_style), Paragraph(pothole.detected_at.strftime('%Y-%m-%d %H:%M:%S') if pothole.detected_at else "N/A", cell_style)],

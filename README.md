@@ -40,15 +40,15 @@ An enterprise-grade, end-to-end intelligent road infrastructure monitoring and g
 
 ## 1. Executive Summary & Problem Statement
 
-Road deterioration, fissures, and unpatched potholes cause billions of dollars in vehicular damages, severe traffic choke points, and life-threatening road accidents globally every year. In urban environments like Delhi-NCR, municipal grievance resolution suffers from systemic failure modes:
+Road deterioration, fissures, and unpatched potholes cause severe traffic choke points, vehicle damage, and life-threatening road accidents. In urban environments like Nagpur, Maharashtra, municipal grievance resolution suffers from systemic failure modes:
 1. **Reporting Friction**: Citizens must navigate cumbersome municipal portals with ambiguous categories.
-2. **Jurisdictional Confusion**: Roads are fragmented across different government bodies (e.g. MCD, PWD, NHAI, NDMC, DDA). Complaints submitted to the wrong department are typically discarded or stuck in multi-month bureaucratic queues.
-3. **Lack of Severity Prioritization**: Road maintenance crews have no quantitative basis to triage hazardous potholes ahead of minor asphalt wear.
-4. **Zero Verification Loop**: Work orders are marked closed without photographic proof or tamper-proof audit trails.
+2. **Jurisdictional Confusion**: Roads are fragmented across different government bodies (e.g. Nagpur Municipal Corporation (NMC), Maharashtra PWD, NHAI Nagpur, Nagpur Improvement Trust (NIT), Maha Metro). Complaints submitted to the wrong department are typically delayed.
+3. **Lack of Severity Prioritization**: Road maintenance crews need a quantitative, transparent basis to triage hazardous potholes ahead of minor wear.
+4. **Zero Verification Loop**: Work orders are often marked closed without photographic proof or tamper-proof audit trails.
 
-**PotholeAI solves this entire chain**:
+**Vikasit Nagpur solves this entire chain**:
 - **Instant AI Detection**: Detects surface defects automatically in images, video clips, and live camera streams.
-- **Accurate Geofencing**: Maps coordinates to the exact municipal division and road type automatically using spatial polygon intersection.
+- **Accurate Geofencing**: Maps coordinates to the exact municipal division and road type automatically using spatial polygon intersection across Nagpur administrative zones.
 - **Immediate Dispatch**: Generates tickets with unique tracking identifiers, emails alerts to authorities, and compiles legal compliance PDF dossiers.
 - **Transparent Lifecycle Tracking**: Enables civic authorities and citizens to track repairs from `Reported` to `Acknowledged`, `In Progress`, and `Resolved` with post-repair photo evidence.
 
@@ -112,20 +112,22 @@ Located in `app/services/authority_service.py`, the routing engine resolves muni
 1. **EXIF GPS Extraction**: Automatically extracts latitude and longitude metadata from uploaded camera photos.
 2. **Reverse Geocoding**: Queries OpenStreetMap Nominatim with caching and error handling to extract road name, suburb/zone, city, and detected road classification.
 3. **Road Hierarchy Mapping**:
-   - `NATIONAL_HIGHWAY` / Expressways $\to$ **National Highways Authority of India (NHAI)**.
-   - `STATE_HIGHWAY` / Arterial Ring Roads / Flyovers $\to$ **Public Works Department (PWD Delhi)**.
+   - `NATIONAL_HIGHWAY` / Expressways $\to$ **National Highways Authority of India (NHAI Nagpur)**.
+   - `STATE_HIGHWAY` / Arterial Ring Roads / Major Corridors $\to$ **Public Works Department (Maharashtra PWD - Nagpur)**.
 4. **Spatial Polygon Geofencing**:
    - Utilizes `shapely.geometry.Point` and `shapely.geometry.Polygon` for point-in-polygon containment against registered municipal zones:
-     - **NDMC**: Central VIP / Lutyens' Delhi corridor.
-     - **MCD South**: South Delhi zones.
-     - **MCD North**: North & North-West municipal divisions.
-     - **MCD East**: Trans-Yamuna municipal divisions.
-5. **Fallback Safety**: Gracefully routes to South Delhi Municipal Corporation or the nearest active civic authority if outside polygon boundaries.
+     - **Dharampeth Zone (NMC Zone 2)**: West Nagpur (Gokulpeth, Ram Nagar, Shivaji Nagar).
+     - **Laxmi Nagar Zone (NMC Zone 1)**: South-West Nagpur (Pratap Nagar, Khamla, Bajaj Nagar).
+     - **Dhantoli & Sitabuldi Zone (NMC Zone 4)**: Central Nagpur / Zero Mile interchange.
+     - **Mangalwari & Sadar Zone (NMC Zone 10)**: North-Central Nagpur (Sadar, Katol Road, Raj Bhavan).
+     - **Asi Nagar & Kamptee Zone (NMC Zone 9)**: North-East Nagpur (Kamptee Road, Uppalwadi).
+     - **Gandhibagh & Mahal Zone (NMC Zone 6)**: Heritage East Nagpur (Itwari, Gandhibagh).
+5. **Fallback Safety**: Gracefully routes to Nagpur Municipal Corporation Head Office (`NMC-HQ`) or nearest active civic authority if outside polygon boundaries.
 
 ### 3.4 Automated Civic Dispatch & Ticket Generation
 - Automatically generates unique, human-readable incident tracking codes:
   $$\text{TKT}-\text{YYYYMMDD}-\langle\text{AUTHORITY\_CODE}\rangle-\langle\text{RANDOM\_4\_DIGITS}\rangle$$
-  *(e.g., `TKT-20260913-MCD-S-8932`)*
+  *(e.g., `TKT-20260922-NMC-PWD-8932`)*
 - Prepares automated grievance emails and dispatch payloads containing incident coordinates, street address, defect count, severity rating, and media URLs.
 - Dispatches emails through SMTP (e.g. Gmail SMTP) or emulates reliable delivery for staging/testing environments.
 
@@ -157,7 +159,8 @@ Located in `Frontend/src/components/AnalyticsDashboard.jsx`:
 
 ### 3.8 Municipal Jurisdictions Directory
 Located in `Frontend/src/components/AuthorityDirectory.jsx`:
-- Displays registered civic bodies: MCD (North, South, East), NDMC, PWD Delhi, NHAI, DDA, BBMP.
+- Displays registered civic bodies: Nagpur Municipal Corporation (NMC), Maharashtra PWD Nagpur, NHAI Nagpur, Nagpur Improvement Trust (NIT), Maha Metro Rail.
+- Shows direct contact emails, emergency helpline numbers, resolution SLA timeframes, and active complaint counts.
 - Shows direct contact emails, emergency helpline numbers, resolution SLA timeframes, and active complaint counts.
 
 ---
@@ -330,15 +333,15 @@ Detects potholes in an uploaded image, resolves civic authority, and creates inc
   "annotated_image_url": "/uploads/annotated_detection.jpg",
   "original_image_url": "/uploads/original_capture.jpg",
   "location_details": {
-    "latitude": 28.5494, "longitude": 77.2528,
-    "address": "Okhla Industrial Estate, New Delhi",
-    "road_name": "Maa Anandmayee Marg", "zone": "South Delhi"
+    "latitude": 21.1458, "longitude": 79.0882,
+    "address": "Sitabuldi Main Road, Zero Mile, Nagpur, Maharashtra",
+    "road_name": "Sitabuldi Main Road", "zone": "Dhantoli & Sitabuldi"
   },
   "suggested_authority": {
-    "id": 2, "name": "MCD - South Delhi Municipal Corporation", "code": "MCD-S", "sla_hours": 48
+    "id": 1, "name": "Nagpur Municipal Corporation - PWD Road Cell", "code": "NMC-PWD", "sla_hours": 48
   },
   "pothole_record": {
-    "id": 42, "ticket_code": "TKT-20260913-MCD-S-8932", "status": "REPORTED"
+    "id": 42, "ticket_code": "TKT-20260922-NMC-PWD-8932", "status": "REPORTED"
   }
 }
 
@@ -369,7 +372,7 @@ Transitions defect status (`REPORTED` $\to$ `ACKNOWLEDGED` $\to$ `IN_PROGRESS` $
 {
   "status": "IN_PROGRESS",
   "resolution_notes": "Repair team dispatched with cold asphalt mix.",
-  "changed_by": "South MCD Field Officer"
+  "changed_by": "NMC Ward 4 Field Officer"
 }
 ```
 

@@ -135,7 +135,7 @@ export default function PotholeDetailModal({ pothole, onClose, onRefresh }) {
                 </div>
                 <div>
                   <span className="text-slate-500 block">Zone & City:</span>
-                  <span className="text-slate-300">{pothole.zone || 'District'}, {pothole.city || 'Delhi NCR'}</span>
+                  <span className="text-slate-300">{pothole.zone || 'Nagpur Zone'}, {pothole.city || 'Nagpur'}</span>
                 </div>
                 <div>
                   <span className="text-slate-500 block">GPS Coordinates:</span>

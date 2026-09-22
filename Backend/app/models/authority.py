@@ -6,8 +6,8 @@ class CivicAuthority(Base):
     __tablename__ = "civic_authorities"
 
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String(100), nullable=False, unique=True) # e.g. MCD North, PWD Delhi, NHAI
-    code = Column(String(20), nullable=False, unique=True) # e.g. MCD-N, PWD-DL, NHAI
+    name = Column(String(100), nullable=False, unique=True) # e.g. NMC, Maharashtra PWD, NHAI Nagpur
+    code = Column(String(20), nullable=False, unique=True) # e.g. NMC-HQ, NMC-PWD, NHAI-NGP
     full_name = Column(String(200), nullable=False)
     department = Column(String(100), default="Road & Infrastructure Division")
     contact_email = Column(String(100), nullable=False)

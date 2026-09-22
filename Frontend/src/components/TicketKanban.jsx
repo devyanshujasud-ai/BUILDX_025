@@ -10,6 +10,7 @@ import {
   Upload
 } from 'lucide-react';
 import { getMediaUrl, getPdfReportUrl, updatePotholeStatus, uploadResolutionProof, FALLBACK_ROAD_IMAGE } from '../services/api';
+import { useLanguage } from '../i18n/LanguageContext';
 
 const COLUMNS = [
   { id: 'REPORTED', title: 'Reported', color: 'border-red-500/40 bg-red-500/5', text: 'text-red-400', badge: 'bg-red-500/20 text-red-300' },
@@ -19,6 +20,7 @@ const COLUMNS = [
 ];
 
 export default function TicketKanban({ potholes, onSelectPothole, onRefresh }) {
+  const { t, getPriorityLabel, getStatusLabel } = useLanguage();
   const [updatingId, setUpdatingId] = useState(null);
   const [resolveModalPothole, setResolveModalPothole] = useState(null);
   const [resolutionNotes, setResolutionNotes] = useState('');
@@ -75,10 +77,10 @@ export default function TicketKanban({ potholes, onSelectPothole, onRefresh }) {
         <div>
           <h1 className="text-2xl font-black text-white tracking-tight flex items-center gap-2.5">
             <Building2 className="w-6 h-6 text-sky-400" />
-            <span>Civic Authority Resolution Kanban</span>
+            <span>{t('kanban', 'title', 'Nagpur Civic Ticket Kanban Board')}</span>
           </h1>
           <p className="text-xs text-slate-400 mt-1">
-            Track pothole lifecycle across municipal corporations (MCD, PWD, NHAI, NDMC) from initial automated detection to verified road repair.
+            {t('kanban', 'subtitle', 'Track road defect lifecycle across Nagpur municipal divisions (NMC, Maharashtra PWD, NHAI Nagpur, NIT) from initial automated detection to verified repair.')}
           </p>
         </div>
       </div>
@@ -101,7 +103,9 @@ export default function TicketKanban({ potholes, onSelectPothole, onRefresh }) {
                     col.id === 'ACKNOWLEDGED' ? 'bg-blue-500' :
                     col.id === 'IN_PROGRESS' ? 'bg-amber-500' : 'bg-emerald-500'
                   }`} />
-                  <h3 className="font-extrabold text-xs uppercase tracking-wider text-slate-200">{col.title}</h3>
+                  <h3 className="font-extrabold text-xs uppercase tracking-wider text-slate-200">
+                    {t('kanban.columns', col.id, col.title)}
+                  </h3>
                 </div>
                 <span className={`px-2 py-0.5 rounded-full text-xs font-mono font-bold ${col.badge}`}>
                   {colPotholes.length}
@@ -112,7 +116,7 @@ export default function TicketKanban({ potholes, onSelectPothole, onRefresh }) {
               <div className="space-y-4 flex-1 overflow-y-auto pr-1">
                 {colPotholes.length === 0 ? (
                   <div className="text-center py-12 text-slate-600 text-xs italic">
-                    No tickets in this phase
+                    {t('kanban', 'noTickets', 'No tickets in this phase')}
                   </div>
                 ) : (
                   colPotholes.map((pothole) => (
@@ -131,7 +135,7 @@ export default function TicketKanban({ potholes, onSelectPothole, onRefresh }) {
                           pothole.severity === 'MEDIUM' ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30' :
                           'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
                         }`}>
-                          {pothole.severity}
+                          {getPriorityLabel(pothole.severity)}
                         </span>
                       </div>
 
@@ -162,7 +166,7 @@ export default function TicketKanban({ potholes, onSelectPothole, onRefresh }) {
                         <div className="flex items-center justify-between">
                           <span className="flex items-center gap-1 text-slate-300">
                             <Building2 className="w-3 h-3 text-sky-400" />
-                            <span>{pothole.authority?.code || 'MCD'}</span>
+                            <span>{pothole.authority?.code || 'NMC-PWD'}</span>
                           </span>
                           <span className="text-[10px] text-slate-500">
                             {new Date(pothole.detected_at).toLocaleDateString()}
@@ -201,7 +205,7 @@ export default function TicketKanban({ potholes, onSelectPothole, onRefresh }) {
                             disabled={updatingId === pothole.id}
                             className="flex-1 py-1 px-2 rounded-lg bg-blue-600/80 hover:bg-blue-600 text-white text-[11px] font-bold transition-colors flex items-center justify-center gap-1"
                           >
-                            <span>Acknowledge</span>
+                            <span>{t('kanban', 'acknowledge', 'Acknowledge')}</span>
                             <ArrowRight className="w-3 h-3" />
                           </button>
                         )}
@@ -211,7 +215,7 @@ export default function TicketKanban({ potholes, onSelectPothole, onRefresh }) {
                             disabled={updatingId === pothole.id}
                             className="flex-1 py-1 px-2 rounded-lg bg-amber-600/80 hover:bg-amber-600 text-white text-[11px] font-bold transition-colors flex items-center justify-center gap-1"
                           >
-                            <span>Dispatch Team</span>
+                            <span>{t('kanban', 'dispatchTeam', 'Dispatch Team')}</span>
                             <ArrowRight className="w-3 h-3" />
                           </button>
                         )}
@@ -221,7 +225,7 @@ export default function TicketKanban({ potholes, onSelectPothole, onRefresh }) {
                             disabled={updatingId === pothole.id}
                             className="flex-1 py-1 px-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-bold transition-colors flex items-center justify-center gap-1"
                           >
-                            <span>Mark Resolved</span>
+                            <span>{t('kanban', 'markResolved', 'Mark Resolved')}</span>
                             <CheckCircle2 className="w-3 h-3" />
                           </button>
                         )}
@@ -241,14 +245,14 @@ export default function TicketKanban({ potholes, onSelectPothole, onRefresh }) {
           <div className="bg-slate-900 rounded-3xl border border-slate-800 p-6 max-w-md w-full shadow-2xl space-y-4">
             <h3 className="text-base font-bold text-white flex items-center gap-2">
               <CheckCircle2 className="w-5 h-5 text-emerald-400" />
-              <span>Mark Incident as Resolved</span>
+              <span>{t('kanban', 'resolveModalTitle', 'Mark Incident as Resolved')}</span>
             </h3>
             <p className="text-xs text-slate-400">
               Submit repair confirmation for Ticket <b className="text-sky-300 font-mono">{resolveModalPothole.ticket_code}</b>.
             </p>
 
             <div>
-              <label className="text-xs font-bold text-slate-400 block mb-1">Upload Repaired Road Photo (Proof)</label>
+              <label className="text-xs font-bold text-slate-400 block mb-1">{t('kanban', 'uploadProof', 'Upload Repaired Road Photo (Proof)')}</label>
               <input
                 type="file"
                 accept="image/*"
@@ -258,7 +262,7 @@ export default function TicketKanban({ potholes, onSelectPothole, onRefresh }) {
             </div>
 
             <div>
-              <label className="text-xs font-bold text-slate-400 block mb-1">Repair Notes / Asphalt Mix Details</label>
+              <label className="text-xs font-bold text-slate-400 block mb-1">{t('kanban', 'repairNotesLabel', 'Repair Notes / Asphalt Mix Details')}</label>
               <textarea
                 rows={3}
                 placeholder="e.g., Cold asphalt mix applied and roller compacted. Road smooth."
@@ -273,14 +277,14 @@ export default function TicketKanban({ potholes, onSelectPothole, onRefresh }) {
                 onClick={() => setResolveModalPothole(null)}
                 className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-300"
               >
-                Cancel
+                {t('rfid', 'close', 'Cancel')}
               </button>
               <button
                 onClick={handleResolveSubmit}
                 disabled={updatingId === resolveModalPothole.id}
                 className="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-xs font-bold text-white shadow-lg"
               >
-                Confirm & Close Ticket
+                {t('kanban', 'confirmClose', 'Confirm & Close Ticket')}
               </button>
             </div>
           </div>

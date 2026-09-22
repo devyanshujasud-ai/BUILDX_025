@@ -16,6 +16,7 @@ import {
   ArrowRight
 } from 'lucide-react';
 import { detectImage, detectVideo, lookupAuthority, getMediaUrl, FALLBACK_ROAD_IMAGE } from '../services/api';
+import { useLanguage } from '../i18n/LanguageContext';
 
 const reportLocationIcon = L.divIcon({
   className: 'report-location-marker',
@@ -26,10 +27,36 @@ const reportLocationIcon = L.divIcon({
 
 const existingReportIcon = L.divIcon({
   className: 'report-existing-marker',
-  html: '<div style="width:10px;height:10px;border-radius:9999px;background:#ef4444;border:2px solid white;box-shadow:0 1px 4px rgba(0,0,0,.35);"></div>',
-  iconSize: [10, 10],
-  iconAnchor: [5, 5],
+  html: '<div style="width:12px;height:12px;border-radius:9999px;background:#ef4444;border:2px solid white;box-shadow:0 1px 4px rgba(0,0,0,.35);"></div>',
+  iconSize: [12, 12],
+  iconAnchor: [6, 6],
 });
+
+const createAssetIcon = (type, status) => {
+  let bg = '#38bdf8';
+  let emoji = '📍';
+
+  if (type === 'STREETLIGHT') {
+    bg = status === 'DAMAGED' ? '#ef4444' : '#eab308';
+    emoji = '💡';
+  } else if (type === 'DUSTBIN') {
+    bg = status === 'DAMAGED' ? '#ef4444' : '#a855f7';
+    emoji = '🗑️';
+  } else if (type === 'ROAD_SEGMENT' || type === 'HIGHWAY_CORRIDOR') {
+    bg = '#0284c7';
+    emoji = '🚧';
+  } else if (type === 'TRAFFIC_SIGNAL') {
+    bg = '#10b981';
+    emoji = '🚦';
+  }
+
+  return L.divIcon({
+    className: 'custom-asset-marker',
+    html: `<div style="width:24px;height:24px;border-radius:9999px;background:${bg};border:2px solid white;box-shadow:0 2px 6px rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;font-size:12px;cursor:pointer;">${emoji}</div>`,
+    iconSize: [24, 24],
+    iconAnchor: [12, 12],
+  });
+};
 
 function ReportMapSync({ center }) {
   const map = useMap();
@@ -54,11 +81,15 @@ function ReportMapClick({ onPickLocation }) {
 export default function DetectionStudio({
   potholes = [],
   authorities = [],
+  assets = [],
+  issues = [],
   selectedPothole,
   onSelectPothole,
   onPotholeCreated,
   onNavigateToKanban
 }) {
+  const { t, getPriorityLabel, getStatusLabel, getDepartmentLabel, getIssueTypeLabel } = useLanguage();
+  const [mapLayer, setMapLayer] = useState('ALL'); // 'ALL' | 'POTHOLE' | 'STREETLIGHT' | 'DUSTBIN' | 'ROAD'
   const [mode, setMode] = useState('image'); // 'image' | 'video' | 'webcam'
   const [file, setFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
@@ -66,9 +97,9 @@ export default function DetectionStudio({
   const [detectionResult, setDetectionResult] = useState(null);
   const [error, setError] = useState(null);
 
-  // Geolocation & Metadata State
-  const [latitude, setLatitude] = useState(28.5494);
-  const [longitude, setLongitude] = useState(77.2528);
+  // Geolocation & Metadata State (Nagpur Center: Sitabuldi / Zero Mile)
+  const [latitude, setLatitude] = useState(21.1458);
+  const [longitude, setLongitude] = useState(79.0882);
   const [detectingLocation, setDetectingLocation] = useState(false);
   const [locationMessage, setLocationMessage] = useState('');
   const [roadType, setRoadType] = useState('URBAN_ROAD');
@@ -326,10 +357,10 @@ export default function DetectionStudio({
             <span className="p-2 rounded-xl bg-sky-500/20 text-sky-400 border border-sky-500/30">
               <Sparkles className="w-5 h-5" />
             </span>
-            <h1 className="text-2xl font-black text-white tracking-tight">AI Pothole Detection & Reports</h1>
+            <h1 className="text-2xl font-black text-white tracking-tight">{t('complaintForm', 'headerTitle', 'AI Pothole Detection & Citizen Reports')}</h1>
           </div>
           <p className="text-sm text-slate-400 max-w-2xl">
-            Inference engine analyzing dashcam images, high-speed road videos, or real-time camera feeds. Automatically assesses severity, tags GPS, and routes incident tickets to the responsible civic body.
+            {t('complaintForm', 'headerDesc', 'Inference engine analyzing dashcam images, high-speed road videos, or real-time camera feeds. Automatically assesses severity, tags GPS, and routes incident tickets to the responsible civic body.')}
           </p>
         </div>
       </div>
@@ -348,7 +379,7 @@ export default function DetectionStudio({
               }`}
             >
               <Upload className="w-4 h-4" />
-              <span>Image / Photo</span>
+              <span>{t('complaintForm', 'imagePhoto', 'Image / Photo')}</span>
             </button>
             <button
               onClick={() => { setMode('video'); if(webcamActive) toggleWebcam(); }}
@@ -357,7 +388,7 @@ export default function DetectionStudio({
               }`}
             >
               <Video className="w-4 h-4" />
-              <span>Dashcam Video</span>
+              <span>{t('complaintForm', 'dashcamVideo', 'Dashcam Video')}</span>
             </button>
             <button
               onClick={toggleWebcam}
@@ -366,7 +397,7 @@ export default function DetectionStudio({
               }`}
             >
               <Camera className="w-4 h-4" />
-              <span>{webcamActive ? 'Stop Live Feed' : 'Live Camera'}</span>
+              <span>{webcamActive ? t('complaintForm', 'stopLiveFeed', 'Stop Live Feed') : t('complaintForm', 'liveCamera', 'Live Camera')}</span>
             </button>
           </div>
 
@@ -439,15 +470,17 @@ export default function DetectionStudio({
                 <div className="w-16 h-16 rounded-2xl bg-slate-900 group-hover:bg-sky-500/20 text-slate-400 group-hover:text-sky-400 flex items-center justify-center border border-slate-800 group-hover:border-sky-500/30 transition-all mb-4">
                   <Upload className="w-8 h-8" />
                 </div>
-                <span className="text-sm font-bold text-slate-200 group-hover:text-sky-300">
-                  Drop Dashcam Footage or Mobile Camera Photo
+                <span className="text-sm font-bold text-slate-200 group-hover:text-sky-400 transition-colors">
+                  {t('complaintForm', 'dropzoneTitle', 'Drag and drop road inspection photo')}
                 </span>
-                <span className="text-xs text-slate-500 mt-1">Supports JPG, PNG, MP4, MOV (Up to 50MB)</span>
+                <span className="text-xs text-slate-500 mt-1">
+                  {t('complaintForm', 'dropzoneSubtitle', 'or click to browse from device (JPG, PNG, WebP up to 10MB)')}
+                </span>
                 <input
                   type="file"
-                  accept={mode === 'video' ? 'video/*' : 'image/*'}
-                  onChange={handleFileChange}
+                  accept="image/*"
                   className="hidden"
+                  onChange={handleFileChange}
                 />
               </label>
             )}
@@ -491,18 +524,42 @@ export default function DetectionStudio({
             <div className="flex items-center justify-between">
               <h3 className="text-sm font-extrabold text-white flex items-center gap-2">
                 <MapPin className="w-4 h-4 text-sky-400" />
-                <span>Location & Map</span>
+                <span>{t('complaintForm', 'locationAndMap', 'Location & Map Corridor')}</span>
               </h3>
               <button
                 onClick={handleLookupAuthority}
                 disabled={resolvingAuthority}
-                className="text-[11px] font-bold text-sky-400 hover:text-sky-300 hover:underline"
+                className="text-[11px] font-bold text-sky-400 hover:text-sky-300 hover:underline cursor-pointer"
               >
-                {resolvingAuthority ? 'Resolving...' : 'Check Authority'}
+                {resolvingAuthority ? t('complaintForm', 'detecting', 'Resolving...') : t('complaintForm', 'checkAuthority', 'Check Authority')}
               </button>
             </div>
 
-            <div className="h-72 rounded-2xl overflow-hidden border border-slate-800 bg-slate-950">
+            {/* Map Layer Controls */}
+            <div className="flex flex-wrap items-center gap-1.5 p-1 rounded-xl bg-slate-950 border border-slate-800 text-[11px]">
+              {[
+                { id: 'ALL', label: `${t('complaintForm', 'allAssets', 'All')} (${potholes.length + assets.length})` },
+                { id: 'POTHOLE', label: `🕳️ ${t('complaintForm', 'potholes', 'Potholes')} (${potholes.length})` },
+                { id: 'STREETLIGHT', label: `💡 ${t('complaintForm', 'streetlights', 'Streetlights')} (${assets.filter((a) => a.type === 'STREETLIGHT').length})` },
+                { id: 'DUSTBIN', label: `🗑️ ${t('complaintForm', 'dustbins', 'Dustbins')} (${assets.filter((a) => a.type === 'DUSTBIN').length})` },
+                { id: 'ROAD', label: `🚧 ${t('complaintForm', 'corridors', 'Corridors')} (${assets.filter((a) => a.type === 'ROAD_SEGMENT' || a.type === 'HIGHWAY_CORRIDOR').length})` },
+              ].map((pill) => (
+                <button
+                  key={pill.id}
+                  type="button"
+                  onClick={() => setMapLayer(pill.id)}
+                  className={`px-2.5 py-1 rounded-lg font-medium transition ${
+                    mapLayer === pill.id
+                      ? 'bg-sky-500 text-white font-bold shadow'
+                      : 'text-slate-400 hover:text-white hover:bg-slate-800'
+                  }`}
+                >
+                  {pill.label}
+                </button>
+              ))}
+            </div>
+
+            <div className="h-80 rounded-2xl overflow-hidden border border-slate-800 bg-slate-950">
               <MapContainer
                 center={[latitude, longitude]}
                 zoom={13}
@@ -515,6 +572,8 @@ export default function DetectionStudio({
                 />
                 <ReportMapSync center={[latitude, longitude]} />
                 <ReportMapClick onPickLocation={handlePickLocation} />
+                
+                {/* Current Report Pin */}
                 <Marker
                   position={[latitude, longitude]}
                   icon={reportLocationIcon}
@@ -526,32 +585,88 @@ export default function DetectionStudio({
                     },
                   }}
                 >
-                  <Popup>Report location</Popup>
+                  <Popup>Report target location ({latitude.toFixed(4)}, {longitude.toFixed(4)})</Popup>
                 </Marker>
-                {potholes.slice(0, 20).map((pothole) => (
-                  <Marker
-                    key={pothole.id}
-                    position={[pothole.latitude, pothole.longitude]}
-                    icon={existingReportIcon}
-                    eventHandlers={{
-                      click: () => onSelectPothole?.(pothole),
-                    }}
-                  >
-                    <Popup>
-                      <div className="text-xs">
-                        <strong>{pothole.ticket_code || 'Report'}</strong>
-                        <br />
-                        {pothole.road_name || pothole.address || 'Road issue'}
-                      </div>
-                    </Popup>
-                  </Marker>
-                ))}
+
+                {/* Existing Pothole Incidents */}
+                {(mapLayer === 'ALL' || mapLayer === 'POTHOLE') &&
+                  potholes.slice(0, 30).map((pothole) => (
+                    <Marker
+                      key={`pothole-${pothole.id}`}
+                      position={[pothole.latitude, pothole.longitude]}
+                      icon={existingReportIcon}
+                      eventHandlers={{
+                        click: () => onSelectPothole?.(pothole),
+                      }}
+                    >
+                      <Popup>
+                        <div className="text-xs space-y-1">
+                          <strong className="text-red-600 block">{pothole.ticket_code || 'Report'}</strong>
+                          <div>{pothole.road_name || pothole.address || 'Road issue'}</div>
+                          <div className="text-[10px] text-slate-500">
+                            Severity: <span className="font-bold">{pothole.severity}</span> • Status: {pothole.status}
+                          </div>
+                        </div>
+                      </Popup>
+                    </Marker>
+                  ))}
+
+                {/* Physical Assets (Streetlights, Dustbins, Road Segments) */}
+                {assets
+                  .filter((a) => {
+                    if (mapLayer === 'ALL') return true;
+                    if (mapLayer === 'STREETLIGHT') return a.type === 'STREETLIGHT';
+                    if (mapLayer === 'DUSTBIN') return a.type === 'DUSTBIN';
+                    if (mapLayer === 'ROAD') return a.type === 'ROAD_SEGMENT' || a.type === 'HIGHWAY_CORRIDOR';
+                    return false;
+                  })
+                  .map((asset) => {
+                    const linkedIssueCount = issues.filter((i) => i.asset_id === asset.id).length;
+                    return (
+                      <Marker
+                        key={`asset-${asset.id}`}
+                        position={[asset.latitude, asset.longitude]}
+                        icon={createAssetIcon(asset.type, asset.status)}
+                      >
+                        <Popup>
+                          <div className="text-xs space-y-1.5 min-w-[160px]">
+                            <div className="font-bold text-slate-900 border-b pb-1">
+                              {asset.name}
+                            </div>
+                            <div className="text-[11px] text-slate-600">
+                              Type: <span className="font-semibold text-slate-800">{asset.type}</span>
+                            </div>
+                            <div className="text-[11px] text-slate-600">
+                              Dept: <span className="font-semibold text-slate-800">{asset.department}</span>
+                            </div>
+                            <div className="text-[11px]">
+                              Status:{' '}
+                              <span
+                                className={`font-bold px-1.5 py-0.5 rounded text-[10px] ${
+                                  asset.status === 'OPERATIONAL'
+                                    ? 'bg-emerald-100 text-emerald-800'
+                                    : 'bg-amber-100 text-amber-800'
+                                }`}
+                              >
+                                {asset.status}
+                              </span>
+                            </div>
+                            {linkedIssueCount > 0 && (
+                              <div className="text-[10px] font-bold text-red-600 pt-1 border-t">
+                                ⚠ {linkedIssueCount} Active Grievance(s)
+                              </div>
+                            )}
+                          </div>
+                        </Popup>
+                      </Marker>
+                    );
+                  })}
               </MapContainer>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-[11px] font-bold text-slate-400 block mb-1">Latitude</label>
+                <label className="text-[11px] font-bold text-slate-400 block mb-1">{t('complaintForm', 'latitude', 'Latitude')}</label>
                 <input
                   type="number"
                   step="0.0001"
@@ -561,7 +676,7 @@ export default function DetectionStudio({
                 />
               </div>
               <div>
-                <label className="text-[11px] font-bold text-slate-400 block mb-1">Longitude</label>
+                <label className="text-[11px] font-bold text-slate-400 block mb-1">{t('complaintForm', 'longitude', 'Longitude')}</label>
                 <input
                   type="number"
                   step="0.0001"
@@ -574,18 +689,18 @@ export default function DetectionStudio({
 
             <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-slate-950 border border-slate-800 px-3 py-2">
               <div>
-                <p className="text-xs font-semibold text-slate-200">Location mode</p>
+                <p className="text-xs font-semibold text-slate-200">{t('complaintForm', 'locationMode', 'Location mode')}</p>
                 <p className="text-[11px] text-slate-500">
-                  Enter manually, click the map, or detect from browser GPS.
+                  {t('complaintForm', 'locationModeDesc', 'Enter manually, click the map, or detect from browser GPS.')}
                 </p>
               </div>
               <button
                 type="button"
                 onClick={useCurrentLocation}
                 disabled={detectingLocation}
-                className="px-3 py-1.5 rounded-md bg-slate-800 hover:bg-slate-700 disabled:opacity-60 text-xs font-semibold text-slate-100 border border-slate-700 transition-colors"
+                className="px-3 py-1.5 rounded-md bg-slate-800 hover:bg-slate-700 disabled:opacity-60 text-xs font-semibold text-slate-100 border border-slate-700 transition-colors cursor-pointer"
               >
-                {detectingLocation ? 'Detecting...' : 'Use Current Location'}
+                {detectingLocation ? t('complaintForm', 'detecting', 'Detecting...') : t('complaintForm', 'useCurrentLocation', 'Use Current Location')}
               </button>
             </div>
 
@@ -594,21 +709,21 @@ export default function DetectionStudio({
             )}
 
             <div>
-              <label className="text-[11px] font-bold text-slate-400 block mb-1">Road Classification</label>
+              <label className="text-[11px] font-bold text-slate-400 block mb-1">{t('complaintForm', 'roadClassification', 'Road Classification')}</label>
               <select
                 value={roadType}
                 onChange={(e) => setRoadType(e.target.value)}
                 className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-200 focus:outline-none focus:border-sky-500"
               >
-                <option value="URBAN_ROAD">Urban / Municipal Road (MCD)</option>
-                <option value="STATE_HIGHWAY">State Highway / Arterial Ring Road (PWD)</option>
-                <option value="NATIONAL_HIGHWAY">National Highway / Expressway (NHAI)</option>
-                <option value="RESIDENTIAL">Residential Sector Lane</option>
+                <option value="URBAN_ROAD">{t('complaintForm', 'urbanRoad', 'Urban / Municipal Road (NMC)')}</option>
+                <option value="STATE_HIGHWAY">{t('complaintForm', 'stateHighway', 'State Highway / Arterial Ring Road (PWD Maharashtra)')}</option>
+                <option value="NATIONAL_HIGHWAY">{t('complaintForm', 'nationalHighway', 'National Highway / Outer Bypass (NHAI Nagpur)')}</option>
+                <option value="RESIDENTIAL">{t('complaintForm', 'residential', 'Residential Ward Lane (NMC Zone)')}</option>
               </select>
             </div>
 
             <div>
-              <label className="text-[11px] font-bold text-slate-400 block mb-1">Reported By / Source</label>
+              <label className="text-[11px] font-bold text-slate-400 block mb-1">{t('complaintForm', 'reportedBy', 'Reported By / Citizen Name')}</label>
               <input
                 type="text"
                 value={reportedBy}
@@ -625,7 +740,7 @@ export default function DetectionStudio({
                   onChange={(e) => setAutoReport(e.target.checked)}
                   className="rounded bg-slate-950 border-slate-700 text-sky-500 focus:ring-0 w-4 h-4 cursor-pointer"
                 />
-                <span>Auto-Dispatch Incident to Civic Body</span>
+                <span>{t('complaintForm', 'autoDispatch', 'Auto-Dispatch Incident to Civic Body')}</span>
               </label>
             </div>
           </div>
@@ -634,7 +749,7 @@ export default function DetectionStudio({
           <div className="bg-gradient-to-br from-slate-900 to-slate-900/60 rounded-3xl p-6 border border-slate-800 shadow-xl space-y-4">
             <div className="flex items-center gap-2 text-sm font-extrabold text-white">
               <Building2 className="w-4 h-4 text-sky-400" />
-              <span>Assigned Civic Authority</span>
+              <span>{t('complaintForm', 'assignedAuthority', 'Assigned Civic Authority')}</span>
             </div>
 
             {resolvedAuthority ? (
@@ -642,7 +757,7 @@ export default function DetectionStudio({
                 <div className="flex items-start justify-between gap-2">
                   <div>
                     <h4 className="font-bold text-sm text-sky-200">{resolvedAuthority.name}</h4>
-                    <p className="text-xs text-slate-400">{resolvedAuthority.department}</p>
+                    <p className="text-xs text-slate-400">{getDepartmentLabel(resolvedAuthority.department)}</p>
                   </div>
                   <span className="px-2 py-0.5 rounded text-[10px] font-bold font-mono bg-sky-500/20 text-sky-300 border border-sky-500/30">
                     {resolvedAuthority.code}
@@ -651,18 +766,18 @@ export default function DetectionStudio({
 
                 <div className="grid grid-cols-2 gap-2 text-[11px] text-slate-300 pt-2 border-t border-sky-900/40 font-mono">
                   <div>
-                    <span className="text-slate-500 block">SLA Target:</span>
-                    <span className="font-bold text-emerald-400">{resolvedAuthority.sla_hours} Hours</span>
+                    <span className="text-slate-500 block">{t('complaintForm', 'slaTarget', 'SLA Target:')}</span>
+                    <span className="font-bold text-emerald-400">{resolvedAuthority.sla_hours} {t('complaintForm', 'hours', 'Hours')}</span>
                   </div>
                   <div>
-                    <span className="text-slate-500 block">Dispatch Email:</span>
+                    <span className="text-slate-500 block">{t('complaintForm', 'dispatchEmail', 'Dispatch Email:')}</span>
                     <span className="truncate block">{resolvedAuthority.contact_email}</span>
                   </div>
                 </div>
               </div>
             ) : (
               <div className="p-4 rounded-2xl bg-slate-950/60 border border-slate-800 text-center text-xs text-slate-400">
-                AI will automatically determine the civic department (MCD, PWD, NHAI) based on the GPS coordinates.
+                {t('complaintForm', 'aiRoutingNotice', 'AI will automatically determine the civic department (NMC, Maharashtra PWD, NHAI Nagpur) based on the GPS coordinates.')}
               </div>
             )}
 
@@ -671,19 +786,19 @@ export default function DetectionStudio({
               <div className="p-4 rounded-2xl bg-emerald-950/40 border border-emerald-800/60 space-y-3">
                 <div className="flex items-center gap-2 text-xs font-bold text-emerald-300">
                   <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                  <span>Ticket Successfully Dispatched!</span>
+                  <span>{t('complaintForm', 'ticketDispatched', 'Ticket Successfully Dispatched!')}</span>
                 </div>
                 <div className="flex items-center justify-between font-mono text-xs">
-                  <span className="text-slate-400">Reference:</span>
+                  <span className="text-slate-400">{t('complaintForm', 'reference', 'Reference:')}</span>
                   <span className="font-bold text-white bg-slate-950 px-2 py-1 rounded border border-slate-800">
                     {detectionResult.pothole_record.ticket_code}
                   </span>
                 </div>
                 <button
                   onClick={onNavigateToKanban}
-                  className="w-full py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition-colors flex items-center justify-center gap-1.5"
+                  className="w-full py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
                 >
-                  <span>View in Civic Kanban Board</span>
+                  <span>{t('complaintForm', 'viewInKanban', 'View in Civic Kanban Board')}</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </button>
               </div>

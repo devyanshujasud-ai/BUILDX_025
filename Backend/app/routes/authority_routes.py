@@ -10,7 +10,7 @@ router = APIRouter(prefix="/api/authorities", tags=["Civic Authorities"])
 
 @router.get("", response_model=List[CivicAuthorityResponse])
 def get_authorities(db: Session = Depends(get_db)):
-    """List all registered civic authorities (MCD, PWD, NHAI, etc.)"""
+    """List all registered civic authorities (NMC, PWD, NHAI, NIT, etc.)"""
     authorities = db.query(CivicAuthority).filter(CivicAuthority.active == True).all()
     return authorities
 

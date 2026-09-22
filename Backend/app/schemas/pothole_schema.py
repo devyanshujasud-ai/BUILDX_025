@@ -16,7 +16,7 @@ class PotholeBase(BaseModel):
     latitude: float
     longitude: float
     address: Optional[str] = None
-    city: Optional[str] = "Delhi NCR"
+    city: Optional[str] = "Nagpur"
     zone: Optional[str] = None
     road_name: Optional[str] = None
     road_type: Optional[str] = "URBAN_ROAD"

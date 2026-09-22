@@ -10,7 +10,9 @@ import {
   Cpu,
   HardHat,
   Globe,
-  LayoutDashboard
+  LayoutDashboard,
+  DollarSign,
+  CircuitBoard
 } from 'lucide-react';
 import { useLanguage } from '../i18n/LanguageContext';
 
@@ -19,12 +21,15 @@ export default function Navbar({ activeTab, setActiveTab, stats, onOpenSettings,
 
   const tabs = [
     { id: 'command', label: t('nav', 'commandCenter', 'Command Center'), icon: LayoutDashboard },
+    { id: 'hardware', label: t('nav', 'hardware', 'Hardware'), icon: CircuitBoard, badge: 'ESP32' },
+    { id: 'budget', label: t('nav', 'budget', 'Smart Budget'), icon: DollarSign, badge: '40% Cut' },
     { id: 'detect', label: t('nav', 'report', 'Report'), icon: Scan },
     { id: 'works', label: t('nav', 'works', 'Works'), icon: HardHat },
     { id: 'kanban', label: t('nav', 'workList', 'Work List'), icon: KanbanSquare },
     { id: 'analytics', label: t('nav', 'stats', 'Stats'), icon: BarChart3 },
     { id: 'authorities', label: t('nav', 'offices', 'Offices'), icon: Building2 },
   ];
+
 
   return (
     <header className="bg-slate-900/95 backdrop-blur-md border-b border-slate-800/80 sticky top-0 z-50">
@@ -67,6 +72,11 @@ export default function Navbar({ activeTab, setActiveTab, stats, onOpenSettings,
                 >
                   <Icon className="w-3.5 h-3.5 flex-shrink-0" />
                   <span>{tab.label}</span>
+                  {tab.badge && (
+                    <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 font-mono font-bold tracking-tight">
+                      {tab.badge}
+                    </span>
+                  )}
                 </button>
               );
             })}

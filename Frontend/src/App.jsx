@@ -10,6 +10,8 @@ import RFIDSimulatorModal from './components/RFIDSimulatorModal';
 import IoTSimulatorModal from './components/IoTSimulatorModal';
 import ConstructionCoordination from './components/ConstructionCoordination';
 import UnifiedCommandCenter from './components/UnifiedCommandCenter';
+import SmartBudgetOptimizer from './components/SmartBudgetOptimizer';
+import HardwareMonitor from './components/HardwareMonitor';
 import { LanguageProvider } from './i18n/LanguageContext';
 import { getPotholes, getAuthorities, getPotholeStats, getAssets, getIssues } from './services/api';
 
@@ -88,6 +90,14 @@ export default function App() {
             onOpenIoT={() => setIotModalOpen(true)}
             onRefreshData={fetchData}
           />
+        )}
+
+        {activeTab === 'budget' && (
+          <SmartBudgetOptimizer />
+        )}
+
+        {activeTab === 'hardware' && (
+          <HardwareMonitor />
         )}
 
         {activeTab === 'detect' && (

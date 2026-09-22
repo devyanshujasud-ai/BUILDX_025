@@ -24,6 +24,8 @@ Frontend/.env
 
 # Database
 Backend/*.db
+*.db
+potholes.db
 *.sqlite
 *.sqlite3
 

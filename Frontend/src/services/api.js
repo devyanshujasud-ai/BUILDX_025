@@ -287,7 +287,37 @@ export const createConstructionContractor = async (contractorData) => {
   return response.data;
 };
 
+export const getRoadCorridors = async () => {
+  const response = await api.get('/api/budget/corridors');
+  return response.data;
+};
 
+export const optimizeBudget = async (optimizationParams) => {
+  const response = await api.post('/api/budget/optimize', optimizationParams);
+  return response.data;
+};
+
+export const getBudgetSummary = async (reductionPct = 40.0) => {
+  const response = await api.get(`/api/budget/summary?reduction_pct=${reductionPct}`);
+  return response.data;
+};
+
+// --- ESP32 Hardware Integration APIs ---
+
+export const getHardwareStatus = async () => {
+  const response = await api.get('/api/hardware/status');
+  return response.data;
+};
+
+export const getHardwareEvents = async (limit = 50) => {
+  const response = await api.get(`/api/hardware/events?limit=${limit}`);
+  return response.data;
+};
+
+export const getHardwareRFIDMap = async () => {
+  const response = await api.get('/api/hardware/rfid-map');
+  return response.data;
+};
 
 export const FALLBACK_ROAD_IMAGE = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="640" height="480" viewBox="0 0 640 480"><rect width="640" height="480" fill="%230f172a"/><line x1="320" y1="0" x2="320" y2="480" stroke="%23334155" stroke-width="4" stroke-dasharray="20 15"/><ellipse cx="320" cy="240" rx="100" ry="50" fill="%231e293b" stroke="%23f59e0b" stroke-width="3" stroke-dasharray="6 4"/><ellipse cx="320" cy="240" rx="70" ry="30" fill="%23090d16"/><text x="320" y="330" text-anchor="middle" fill="%2394a3b8" font-family="system-ui, sans-serif" font-size="14" font-weight="bold">ROAD DEFECT CAPTURE</text><text x="320" y="355" text-anchor="middle" fill="%2364748b" font-family="system-ui, sans-serif" font-size="11">Municipal Evidence Archive</text></svg>`;
 

@@ -7,6 +7,8 @@ from app.routes.issue_routes import router as issue_router
 from app.routes.rfid_routes import router as rfid_router
 from app.routes.iot_routes import router as iot_router
 from app.routes.construction_routes import router as construction_router
+from app.routes.budget_routes import router as budget_router
+from app.routes.hardware_routes import router as hardware_router
 
 __all__ = [
     "detection_router",
@@ -18,6 +20,9 @@ __all__ = [
     "rfid_router",
     "iot_router",
     "construction_router",
+    "budget_router",
+    "hardware_router",
 ]
+
 
 

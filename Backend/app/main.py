@@ -15,6 +15,8 @@ from app.routes import (
     rfid_router,
     iot_router,
     construction_router,
+    budget_router,
+    hardware_router,
 )
 from app.seed import init_and_seed_db
 
@@ -47,6 +49,8 @@ app.include_router(issue_router)
 app.include_router(rfid_router)
 app.include_router(iot_router)
 app.include_router(construction_router)
+app.include_router(budget_router)
+app.include_router(hardware_router)
 
 # Auto initialize and seed schema
 try:

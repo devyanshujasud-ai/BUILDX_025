@@ -4,59 +4,81 @@ from geopy.geocoders import Nominatim
 from sqlalchemy.orm import Session
 from app.models.authority import CivicAuthority
 
-# Built-in Geofencing Polygons for Delhi-NCR & major zones
+# Geofencing Polygons for Nagpur Municipal Corporation (NMC) Administrative Zones & Corridors
 GEOFENCE_ZONES = {
-    "NDMC": {
+    "DHARAMPETH_ZONE": {
         "polygon": [
-            [28.6400, 77.2000], [28.6400, 77.2400], [28.5800, 77.2400], [28.5800, 77.1800], [28.6400, 77.2000]
+            [21.1300, 79.0400], [21.1650, 79.0400], [21.1650, 79.0800], [21.1300, 79.0800], [21.1300, 79.0400]
         ],
-        "name": "New Delhi Municipal Council (NDMC)",
-        "code": "NDMC",
-        "email": "civic.grievance@ndmc.gov.in",
-        "phone": "+91-11-23360662",
+        "name": "NMC - Dharampeth Zone (Zone 2)",
+        "code": "NMC-DP",
+        "email": "dharampeth.zone@nmcnagpur.gov.in",
+        "phone": "+91-712-2567041",
         "sla_hours": 24,
         "type": "MUNICIPAL"
     },
-    "MCD_SOUTH": {
+    "LAXMI_NAGAR_ZONE": {
         "polygon": [
-            [28.5800, 77.0500], [28.5800, 77.3000], [28.4500, 77.3000], [28.4500, 77.0500], [28.5800, 77.0500]
+            [21.0900, 79.0400], [21.1300, 79.0400], [21.1300, 79.0850], [21.0900, 79.0850], [21.0900, 79.0400]
         ],
-        "name": "MCD - South Delhi Municipal Corporation",
-        "code": "MCD-S",
-        "email": "roads.south@mcd.nic.in",
-        "phone": "+91-11-26522700",
-        "sla_hours": 48,
+        "name": "NMC - Laxmi Nagar Zone (Zone 1)",
+        "code": "NMC-LN",
+        "email": "laxminagar.zone@nmcnagpur.gov.in",
+        "phone": "+91-712-2567042",
+        "sla_hours": 24,
         "type": "MUNICIPAL"
     },
-    "MCD_NORTH": {
+    "DHANTOLI_SITABULDI_ZONE": {
         "polygon": [
-            [28.7800, 77.0500], [28.7800, 77.2800], [28.6400, 77.2800], [28.6400, 77.0500], [28.7800, 77.0500]
+            [21.1300, 79.0750], [21.1600, 79.0750], [21.1600, 79.0980], [21.1300, 79.0980], [21.1300, 79.0750]
         ],
-        "name": "MCD - North Delhi Municipal Corporation",
-        "code": "MCD-N",
-        "email": "roads.north@mcd.nic.in",
-        "phone": "+91-11-23225200",
-        "sla_hours": 48,
+        "name": "NMC - Dhantoli & Sitabuldi Zone (Zone 4)",
+        "code": "NMC-DH",
+        "email": "dhantoli.zone@nmcnagpur.gov.in",
+        "phone": "+91-712-2567044",
+        "sla_hours": 24,
         "type": "MUNICIPAL"
     },
-    "MCD_EAST": {
+    "MANGALWARI_SADAR_ZONE": {
         "polygon": [
-            [28.7000, 77.2800], [28.7000, 77.3500], [28.5800, 77.3500], [28.5800, 77.2800], [28.7000, 77.2800]
+            [21.1500, 79.0550], [21.1950, 79.0550], [21.1950, 79.0900], [21.1500, 79.0900], [21.1500, 79.0550]
         ],
-        "name": "MCD - East Delhi Municipal Corporation",
-        "code": "MCD-E",
-        "email": "roads.east@mcd.nic.in",
-        "phone": "+91-11-22144444",
-        "sla_hours": 48,
+        "name": "NMC - Mangalwari Zone (Civil Lines, Sadar, Katol Rd)",
+        "code": "NMC-MG",
+        "email": "mangalwari.zone@nmcnagpur.gov.in",
+        "phone": "+91-712-2567045",
+        "sla_hours": 24,
         "type": "MUNICIPAL"
     },
-    "NHAI_CORRIDOR": {
+    "ASI_NAGAR_KAMPTEE_ZONE": {
         "polygon": [
-            [28.4000, 76.9000], [28.8500, 77.5000], [28.8000, 77.6000], [28.3500, 77.0000], [28.4000, 76.9000]
+            [21.1700, 79.0800], [21.2300, 79.0800], [21.2300, 79.1450], [21.1700, 79.1450], [21.1700, 79.0800]
         ],
-        "name": "National Highways Authority of India (NHAI)",
-        "code": "NHAI",
-        "email": "pothole-response@nhai.org",
+        "name": "NMC - Asi Nagar Zone (Kamptee Road, Jaripatka)",
+        "code": "NMC-AN",
+        "email": "asinagar.zone@nmcnagpur.gov.in",
+        "phone": "+91-712-2567046",
+        "sla_hours": 36,
+        "type": "MUNICIPAL"
+    },
+    "GANDHIBAGH_MAHAL_ZONE": {
+        "polygon": [
+            [21.1380, 79.0900], [21.1750, 79.0900], [21.1750, 79.1400], [21.1380, 79.1400], [21.1380, 79.0900]
+        ],
+        "name": "NMC - Gandhibagh Zone (Itwari, Mahal, Wardhaman Nagar)",
+        "code": "NMC-GB",
+        "email": "gandhibagh.zone@nmcnagpur.gov.in",
+        "phone": "+91-712-2567047",
+        "sla_hours": 24,
+        "type": "MUNICIPAL"
+    },
+    "NHAI_NAGPUR_CORRIDOR": {
+        "polygon": [
+            [20.9500, 78.8500], [21.3500, 78.8500], [21.3500, 79.3000], [20.9500, 79.3000], [20.9500, 78.8500]
+        ],
+        "name": "National Highways Authority of India (NHAI Nagpur)",
+        "code": "NHAI-NGP",
+        "email": "piunagpur@nhai.org",
         "phone": "1033",
         "sla_hours": 24,
         "type": "NATIONAL_HIGHWAY"
@@ -66,17 +88,17 @@ GEOFENCE_ZONES = {
 class AuthorityService:
     def __init__(self):
         try:
-            self.geolocator = Nominatim(user_agent="pothole_detection_system_v1")
+            self.geolocator = Nominatim(user_agent="vikasit_nagpur_civic_platform_v2")
         except Exception:
             self.geolocator = None
 
     def reverse_geocode(self, lat: float, lng: float) -> Dict[str, Any]:
-        """Reverse geocode coordinates into address, road, city, zone"""
+        """Reverse geocode coordinates into Nagpur address, road, city, zone"""
         result = {
-            "address": f"Location ({lat:.4f}, {lng:.4f})",
-            "city": "Delhi NCR",
-            "road_name": "Main Arterial Road",
-            "zone": "Central Zone",
+            "address": f"Location ({lat:.4f}, {lng:.4f}), Nagpur, Maharashtra",
+            "city": "Nagpur",
+            "road_name": "Wardha Road",
+            "zone": "Dharampeth Zone",
             "road_type": "URBAN_ROAD"
         }
         
@@ -85,17 +107,17 @@ class AuthorityService:
                 location = self.geolocator.reverse((lat, lng), language='en', timeout=4)
                 if location and location.raw:
                     address_dict = location.raw.get("address", {})
-                    road = address_dict.get("road") or address_dict.get("highway") or address_dict.get("suburb") or "Road"
-                    suburb = address_dict.get("suburb") or address_dict.get("neighbourhood") or address_dict.get("city_district") or "Zone"
-                    city = address_dict.get("city") or address_dict.get("state_district") or address_dict.get("state") or "Delhi"
+                    road = address_dict.get("road") or address_dict.get("highway") or address_dict.get("suburb") or "Wardha Road"
+                    suburb = address_dict.get("suburb") or address_dict.get("neighbourhood") or address_dict.get("city_district") or "Dharampeth Zone"
+                    city = "Nagpur"
                     
                     road_type = "URBAN_ROAD"
                     road_lower = (road + " " + location.address).lower()
-                    if "highway" in road_lower or "expressway" in road_lower or "nh-" in road_lower or "nh " in road_lower:
+                    if "highway" in road_lower or "expressway" in road_lower or "nh-" in road_lower or "nh " in road_lower or "bypass" in road_lower:
                         road_type = "NATIONAL_HIGHWAY"
-                    elif "ring road" in road_lower or "marg" in road_lower or "flyover" in road_lower:
+                    elif "ring road" in road_lower or "marg" in road_lower or "flyover" in road_lower or "avenue" in road_lower:
                         road_type = "STATE_HIGHWAY"
-                    elif "lane" in road_lower or "gali" in road_lower or "sector" in road_lower:
+                    elif "lane" in road_lower or "gali" in road_lower or "ward" in road_lower or "nagar" in road_lower:
                         road_type = "RESIDENTIAL"
                         
                     result.update({
@@ -106,30 +128,34 @@ class AuthorityService:
                         "road_type": road_type
                     })
             except Exception as e:
-                print(f"[Geocode Info] Reverse geocode skipped/timeout: {e}")
+                print(f"[Geocode Info] Reverse geocode note: {e}")
                 
         return result
 
     def resolve_authority_for_location(
         self, db: Session, lat: float, lng: float, road_type: Optional[str] = None
     ) -> Optional[CivicAuthority]:
-        """Resolves the responsible civic body based on coordinates and road category"""
-        # 1. Check if road type matches NHAI / National Highway
+        """Resolves the responsible civic body based on coordinates and road category in Nagpur"""
+        # 1. Check if road type matches NHAI Nagpur Corridor
         if road_type == "NATIONAL_HIGHWAY":
-            nhai = db.query(CivicAuthority).filter(CivicAuthority.code == "NHAI").first()
+            nhai = db.query(CivicAuthority).filter(
+                (CivicAuthority.code == "NHAI-NGP") | (CivicAuthority.code == "NHAI")
+            ).first()
             if nhai:
                 return nhai
                 
-        # 2. Check if road is State Highway / Major Arterial (PWD)
+        # 2. Check if road is State Highway / Major Arterial (Maharashtra PWD)
         if road_type == "STATE_HIGHWAY":
-            pwd = db.query(CivicAuthority).filter(CivicAuthority.code == "PWD-DL").first()
+            pwd = db.query(CivicAuthority).filter(
+                (CivicAuthority.code == "MAHA-PWD") | (CivicAuthority.code == "NMC-PWD")
+            ).first()
             if pwd:
                 return pwd
 
-        # 3. Check Geofencing Polygons
+        # 3. Check Nagpur Geofencing Polygons
         point = Point(lat, lng)
         for key, zone in GEOFENCE_ZONES.items():
-            if key == "NHAI_CORRIDOR" and road_type != "NATIONAL_HIGHWAY":
+            if key == "NHAI_NAGPUR_CORRIDOR" and road_type != "NATIONAL_HIGHWAY":
                 continue
             poly = Polygon(zone["polygon"])
             if poly.contains(point):
@@ -137,8 +163,10 @@ class AuthorityService:
                 if auth:
                     return auth
 
-        # 4. Fallback to general municipal corporation (MCD South or first active authority)
-        default_auth = db.query(CivicAuthority).filter(CivicAuthority.code == "MCD-S").first()
+        # 4. Fallback to NMC PWD Roads or NMC HQ or first active authority
+        default_auth = db.query(CivicAuthority).filter(CivicAuthority.code == "NMC-PWD").first()
+        if not default_auth:
+            default_auth = db.query(CivicAuthority).filter(CivicAuthority.code == "NMC-HQ").first()
         if not default_auth:
             default_auth = db.query(CivicAuthority).filter(CivicAuthority.active == True).first()
             

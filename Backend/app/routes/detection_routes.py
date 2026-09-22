@@ -10,6 +10,8 @@ from app.models.pothole import Pothole, PotholeStatusHistory, StatusEnum, Severi
 from app.models.ticket import CivicTicket
 from app.schemas.pothole_schema import PotholeResponse
 from app.schemas.authority_schema import CivicAuthorityResponse
+from app.models.issue import InfrastructureIssue
+from app.services.priority_service import priority_service
 from app.services.detection_service import detection_service
 from app.services.authority_service import authority_service
 from app.services.notification_service import notification_service
@@ -42,14 +44,14 @@ async def detect_image(
         final_lat = latitude if latitude is not None else exif_lat
         final_lng = longitude if longitude is not None else exif_lng
         
-        # If no GPS provided and no EXIF, fallback to a realistic Delhi NCR coordinate with small variation
+        # If no GPS provided and no EXIF, fallback to a realistic Nagpur coordinate with small variation
         if final_lat is None or final_lng is None:
-            # Default around Central/South Delhi
-            base_lats = [28.6139, 28.5355, 28.7041, 28.6289, 28.5672]
-            base_lngs = [77.2090, 77.2610, 77.1025, 77.2065, 77.2100]
+            # Default around Nagpur key arterial nodes (Sitabuldi, Dharampeth, Sadar, Laxmi Nagar, Civil Lines)
+            base_lats = [21.1458, 21.1524, 21.1630, 21.1215, 21.1540, 21.0965, 21.1780, 21.1440]
+            base_lngs = [79.0882, 79.0680, 79.0820, 79.0685, 79.0730, 79.0760, 79.0550, 79.1320]
             idx = random.randint(0, len(base_lats) - 1)
-            final_lat = round(base_lats[idx] + random.uniform(-0.02, 0.02), 5)
-            final_lng = round(base_lngs[idx] + random.uniform(-0.02, 0.02), 5)
+            final_lat = round(base_lats[idx] + random.uniform(-0.005, 0.005), 5)
+            final_lng = round(base_lngs[idx] + random.uniform(-0.005, 0.005), 5)
 
         # 3. Reverse geocode location
         loc_details = authority_service.reverse_geocode(final_lat, final_lng)
@@ -105,7 +107,7 @@ async def detect_image(
                 latitude=final_lat,
                 longitude=final_lng,
                 address=loc_details.get("address"),
-                city=loc_details.get("city", "Delhi NCR"),
+                city=loc_details.get("city", "Nagpur"),
                 zone=loc_details.get("zone"),
                 road_name=loc_details.get("road_name"),
                 road_type=resolved_road_type,
@@ -170,6 +172,33 @@ async def detect_image(
                 db.add(ticket)
                 db.commit()
 
+                # Automatically create and route corresponding InfrastructureIssue
+                dept = priority_service.route_department("POTHOLE")
+                prio, prio_reason = priority_service.calculate_priority_and_reason(
+                    severity=highest_severity,
+                    issue_created_at=None,
+                    report_count=1,
+                    asset_type="ROAD_SEGMENT",
+                    latitude=final_lat,
+                    longitude=final_lng,
+                )
+                issue = InfrastructureIssue(
+                    type="POTHOLE",
+                    source="AI_DETECTION",
+                    description=f"AI Detection ({ticket_code}): {len(detections)} defect(s) logged on {loc_details.get('road_name') or 'Road'}",
+                    latitude=final_lat,
+                    longitude=final_lng,
+                    severity=highest_severity,
+                    priority=prio,
+                    priority_reason=prio_reason,
+                    report_count=1,
+                    department=dept,
+                    status="REPORTED",
+                    pothole_id=pothole.id,
+                )
+                db.add(issue)
+                db.commit()
+
             pothole_record = pothole
 
         return {
@@ -196,8 +225,8 @@ async def detect_image(
 async def detect_video(
     file: UploadFile = File(...),
     frame_interval: int = Form(15),
-    latitude: Optional[float] = Form(28.6139),
-    longitude: Optional[float] = Form(77.2090),
+    latitude: Optional[float] = Form(21.1458),
+    longitude: Optional[float] = Form(79.0882),
     db: Session = Depends(get_db)
 ):
     """Processes dashcam or mobile video clips and aggregates pothole detections"""

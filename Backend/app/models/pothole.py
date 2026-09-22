@@ -26,7 +26,7 @@ class Pothole(Base):
     latitude = Column(Float, nullable=False, index=True)
     longitude = Column(Float, nullable=False, index=True)
     address = Column(String(300), nullable=True)
-    city = Column(String(100), default="Delhi NCR")
+    city = Column(String(100), default="Nagpur")
     zone = Column(String(100), nullable=True)
     road_name = Column(String(200), nullable=True)
     road_type = Column(String(50), default="URBAN_ROAD") # NATIONAL_HIGHWAY, STATE_HIGHWAY, URBAN_ROAD, RESIDENTIAL

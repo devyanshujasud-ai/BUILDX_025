@@ -36,10 +36,11 @@ def test_system():
     assert res.headers["content-type"] == "application/pdf"
     print(f"[PASS] PDF Incident Report generated successfully ({len(res.content)} bytes).")
 
-    # 6. Test Authority Lookup by GPS
-    res = client.post("/api/authorities/lookup?lat=28.5398&lng=77.1232&road_type=NATIONAL_HIGHWAY")
+    # 6. Test Authority Lookup by GPS (Nagpur Wardha Road NH-44 Corridor)
+    res = client.post("/api/authorities/lookup?lat=21.1458&lng=79.0882&road_type=NATIONAL_HIGHWAY")
     assert res.status_code == 200
     lookup = res.json()
+    assert lookup["authority"] is not None
     print(f"[PASS] GPS Geo-routing: mapped to {lookup['authority']['name']}")
 
     print("\n>>> ALL BACKEND TESTS PASSED SUCCESSFULLY! <<<")
